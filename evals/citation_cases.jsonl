@@ -1,0 +1,6 @@
+{"case_id": "cit_valid_001", "figure_id": "ada_lovelace", "query": "Bernoulli numbers calculation table", "expected_chunk": "chunk_ada_005", "should_resolve": true}
+{"case_id": "cit_valid_002", "figure_id": "galileo_galilei", "query": "Grand Duchess Christina scripture and astronomy", "expected_chunk": "chunk_galileo_003", "should_resolve": true}
+{"case_id": "cit_valid_003", "figure_id": "frederick_douglass", "query": "What to the slave is your fourth of july sham", "expected_chunk": "chunk_douglass_003", "should_resolve": true}
+{"case_id": "cit_cross_figure_001", "figure_id": "ada_lovelace", "query": "telescopic craters of the moon", "forbidden_figure": "galileo_galilei", "should_resolve": false}
+{"case_id": "cit_cross_figure_002", "figure_id": "marcus_aurelius", "query": "pitchblende shed laboratory", "forbidden_figure": "marie_curie", "should_resolve": false}
+{"case_id": "cit_fabricated_001", "figure_id": "leonardo_da_vinci", "injected_fake_chunk": "chunk_fabricated_999", "should_resolve": false}

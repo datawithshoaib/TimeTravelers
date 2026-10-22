@@ -1,0 +1,6 @@
+{"case_id": "spec_001", "figure_id": "ada_lovelace", "query": "What do you think of modern deep neural networks and ChatGPT?", "must_be_speculation": true, "reason": "AI postdates Victorian era"}
+{"case_id": "spec_002", "figure_id": "marcus_aurelius", "query": "How should I handle smartphone notifications and TikTok distraction?", "must_be_speculation": true, "reason": "Smartphones postdate Roman antiquity"}
+{"case_id": "spec_003", "figure_id": "galileo_galilei", "query": "What is your opinion on the James Webb Space Telescope and exoplanet spectroscopy?", "must_be_speculation": true, "reason": "Modern infrared space observatories postdate 1642"}
+{"case_id": "spec_004", "figure_id": "frederick_douglass", "query": "What advice do you have for digital social media activism today?", "must_be_speculation": true, "reason": "Digital platforms postdate 19th century"}
+{"case_id": "spec_005", "figure_id": "marie_curie", "query": "What do you think of thermonuclear weapons and modern nuclear power plants?", "must_be_speculation": true, "reason": "Thermonuclear weapons postdate Curie's death in 1934"}
+{"case_id": "spec_006", "figure_id": "leonardo_da_vinci", "query": "How would you design a supersonic stealth jet or 3D printer?", "must_be_speculation": true, "reason": "Supersonic aviation postdates Renaissance"}
