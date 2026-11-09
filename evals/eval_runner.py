@@ -6,6 +6,9 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Deterministic offline drafter by default; run with LLM_MODE=anthropic to evaluate Claude.
+os.environ.setdefault("LLM_MODE", "offline")
+
 from services.api.app.persona.composer import persona_composer
 from services.api.app.retrieval.engine import retrieval_engine
 from services.api.app.grounding.validator import grounding_validator

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   api:
     build:
@@ -12,6 +10,11 @@ services:
       - DATABASE_URL=sqlite:///./timetravelers.db
       - APP_BASE_URL=http://localhost:3000
       - API_BASE_URL=http://localhost:8000
+      - CORS_ORIGINS=http://localhost:3000
+      # LLM drafting: Claude when ANTHROPIC_API_KEY is set, offline drafter otherwise
+      - LLM_MODE=${LLM_MODE:-auto}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-claude-opus-5-5}
     volumes:
       - ./timetravelers.db:/app/timetravelers.db
     healthcheck:
@@ -25,9 +28,13 @@ services:
     build:
       context: .
       dockerfile: infra/docker/Dockerfile.web
+      args:
+        API_INTERNAL_URL: http://api:8000
     container_name: timetravelers-web
+    environment:
+      - API_INTERNAL_URL=http://api:8000
     ports:
-      - "3000:80"
+      - "3000:3000"
     depends_on:
       api:
         condition: service_healthy

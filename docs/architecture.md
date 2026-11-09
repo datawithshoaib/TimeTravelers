@@ -6,19 +6,20 @@ TimeTravelers is a source-first educational historical conversation application.
 
 ```
 +-----------------------------------------------------------+
-|                    Next.js / React Web                    |
+|     Next.js (App Router) + Tailwind CSS + shadcn/ui       |
 |  - Split View: Persona Dialogue + Sticky Source Panel     |
 |  - Real-time Citation Highlighting & Context Inspector    |
 |  - Scope & Limitations Drawer                             |
 |  - Citation Export (APA, BibTeX, Chicago, Markdown)       |
 +-----------------------------+-----------------------------+
-                              | REST JSON
+                              | REST JSON (via Next.js rewrites)
                               v
 +-----------------------------------------------------------+
 |                 FastAPI Orchestration Layer               |
 |  - Figure Scope Resolver                                  |
 |  - Hybrid Retrieval Engine (BM25 + Semantic + RapidFuzz)  |
-|  - Persona Composer & Anachronism Filter                  |
+|  - LangGraph turn workflow (classify/retrieve/draft)      |
+|  - Claude drafter via LangChain (offline fallback)        |
 |  - Grounding & Citation Validator                         |
 |  - Ingestion & Provenance Verifier                        |
 +--------------+------------------------------+-------------+
@@ -31,6 +32,19 @@ TimeTravelers is a source-first educational historical conversation application.
 | - Conversations & Feedback  | | - Rights & Quality Scores |
 +-----------------------------+ +---------------------------+
 ```
+
+## 1a. AI Orchestration (LangChain + LangGraph)
+
+Each chat turn runs a compiled LangGraph `StateGraph` (`services/api/app/ai/graph.py`):
+
+```
+load_figure -> classify -> retrieve -> draft -> validate -> END
+     \-> not_found -> END   (unknown figure_id)
+```
+
+- **retrieve** uses `FigureScopedRetriever`, a LangChain `BaseRetriever` bound to one `figure_id`, wrapping the hybrid lexical engine.
+- **draft** calls Claude (`claude-opus-5-5` by default) through `langchain-anthropic` with structured output (`DraftAnswer`, `json_schema` mode) and the last few conversation turns as history. With no `ANTHROPIC_API_KEY`, or `LLM_MODE=offline`, or if the LLM call fails, a deterministic offline drafter builds the answer from the retrieved chunks.
+- **validate** passes every drafted segment through the `GroundingValidator`, so LLM output is held to the same citation rules as the offline drafter.
 
 ## 2. Per-Figure Retrieval Isolation
 The system enforces strict server-side collection scoping:

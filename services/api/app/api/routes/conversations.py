@@ -5,6 +5,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
 
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+
 from ...schemas.conversations import (
     ConversationCreate,
     ConversationResponse,
@@ -20,8 +22,24 @@ from ...database import (
 )
 from ...figures.catalog import get_figure_by_id
 from ...persona.composer import persona_composer
+from ...config import settings
 
 router = APIRouter(prefix="/api/v1", tags=["Conversations"])
+
+
+def load_recent_history(db: Session, conversation_id: str) -> List[BaseMessage]:
+    """Most recent turns of a conversation as LangChain messages, oldest first."""
+    rows = (
+        db.query(MessageModel)
+        .filter(MessageModel.conversation_id == conversation_id)
+        .order_by(MessageModel.created_at.desc())
+        .limit(settings.history_turns * 2)
+        .all()
+    )
+    return [
+        HumanMessage(content=m.content) if m.role == "user" else AIMessage(content=m.content)
+        for m in reversed(rows)
+    ]
 
 
 @router.post("/conversations", response_model=ConversationResponse)
@@ -124,6 +142,8 @@ def submit_question(
     if not conv:
         raise HTTPException(status_code=404, detail=f"Conversation '{conversation_id}' not found.")
 
+    history = load_recent_history(db, conversation_id)
+
     user_msg_id = f"msg_{uuid.uuid4().hex[:12]}"
     user_msg = MessageModel(
         message_id=user_msg_id,
@@ -140,7 +160,8 @@ def submit_question(
         figure_id=conv.figure_id,
         query=payload.message,
         conversation_id=conversation_id,
-        message_id=assistant_msg_id
+        message_id=assistant_msg_id,
+        history=history
     )
 
     assistant_msg = MessageModel(
@@ -195,8 +216,8 @@ def direct_chat(payload: DirectChatRequest, db: Session = Depends(get_db)):
                 conversation_id=conv_id,
                 figure_id=payload.figure_id,
                 user_id=payload.user_id or "default_user",
-                created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
                 settings_json="{}"
             )
             db.add(conv)

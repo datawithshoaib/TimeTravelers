@@ -34,26 +34,31 @@
 
 ## 🚀 Quickstart
 
-### 1. Backend API (FastAPI)
+### 1. Backend API (FastAPI + LangChain/LangGraph)
 
 ```bash
 # In project root
-python -m pip install -e .
+python -m pip install -e ".[dev]"
+cp .env.example .env          # optionally set ANTHROPIC_API_KEY
 
 # Run the API server
 python -m uvicorn services.api.app.main:app --reload --port 8000
 ```
 - API Docs: `http://localhost:8000/docs`
 - Health Probe: `http://localhost:8000/health/ready`
+- With `ANTHROPIC_API_KEY` set, answers are drafted by Claude (`claude-opus-5-5`) through LangChain.
+  Without it (or with `LLM_MODE=offline`) a deterministic offline drafter is used. Either way,
+  every citation passes the same grounding validator.
 
-### 2. Frontend Web App (React + TypeScript)
+### 2. Frontend Web App (Next.js + Tailwind CSS + shadcn/ui)
 
 ```bash
 cd apps/web
 npm install
 npm run dev
 ```
-Open `http://localhost:5173` or `http://localhost:3000` in your browser.
+Open `http://localhost:3000`. Next.js proxies `/api/v1/*` and `/health/*` to the API at
+`API_INTERNAL_URL` (default `http://localhost:8000`).
 
 ### 3. Run Test Suite & Evaluation Harness
 
@@ -78,11 +83,11 @@ docker compose up --build
 ```
 TimeTravelers/
 ├── apps/
-│   └── web/                   # React + TypeScript luxury frontend
-│       ├── src/
-│       │   ├── components/    # Chat, Source Inspector, Modals
-│       │   ├── styles/        # Curated academic dark design system
-│       │   └── types/         # TypeScript schema definitions
+│   └── web/                   # Next.js (App Router) + Tailwind CSS v4 + shadcn/ui
+│       └── src/
+│           ├── app/           # Layout, theme tokens, server-rendered page
+│           ├── components/    # Chat, Source Inspector, dialogs (ui/ = shadcn primitives)
+│           └── lib/           # API clients, types, citation formatting
 ├── services/
 │   └── api/                   # Python FastAPI backend
 │       ├── app/
@@ -90,7 +95,8 @@ TimeTravelers/
 │       │   ├── figures/       # Historical figures catalog & profiles
 │       │   ├── sources/       # Archival source texts & chunk boundaries
 │       │   ├── retrieval/     # Per-figure isolated hybrid search
-│       │   ├── persona/       # Simulated historical voice composer
+│       │   ├── ai/            # LangGraph turn workflow, LangChain retriever, prompts, Claude model
+│       │   ├── persona/       # Composer facade over the LangGraph workflow
 │       │   ├── grounding/     # Strict citation & speculation validator
 │       │   └── main.py        # App entry point
 │       └── tests/             # Pytest test suite
